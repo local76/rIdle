@@ -10,7 +10,7 @@ A lightweight, modern Windows Screen Saver Management TUI dashboard built in Rus
 |  ▶ Active:         ACTIVE                                      |
 |    Timeout:        10 minutes                                  |
 |    Prevent sleep:  DISABLED (NORMAL)                           |
-|    Applied:        mystify.scr                                 |
+|    Cycle time:     30 seconds                                  |
 +================================================================+
 ```
 
@@ -54,10 +54,11 @@ Navigate and configure your preferences dynamically using the keyboard:
 
 | Key | Action |
 | :--- | :--- |
-| **`Tab`** / **`BackTab`** | Cycle focus between **Global System Preferences** and **Screen Savers List** |
+| **`Tab`** / **`BackTab`** | Cycle focus between **Global System Preferences** and **Screen Saver Preferences** |
 | **`↑ / ↓`** | Navigate fields in preferences or entries in the screensaver list |
-| **`← / →`** | Adjust Screensaver Timeout |
-| **`Space / Enter`** | Toggle preferences (Active state, Prevent sleep) or apply the highlighted screensaver |
+| **`← / →`** | Adjust Screensaver Timeout (when Timeout highlighted) or Cycle Time (when Cycle time highlighted) |
+| **`Space`** | Toggle preferences (Active state, Prevent sleep) or check/uncheck screensavers in the list |
+| **`Enter`** | Apply current selection configuration to the registry (sets cycle of checked options if >1 checked) |
 | **`/`** | Open filter search input (type to filter screensavers, press `Esc` to clear) |
 | **`F5`** / **`R`** | Re-scan the system and `%APPDATA%` directories for new screensavers |
 | **`P`** | Launch a full-screen preview of the highlighted screensaver |
