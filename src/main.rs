@@ -203,11 +203,7 @@ fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::Error
 
     let _title_guard = ConsoleTitleGuard::new("SSM — Screen Saver Management");
 
-    let mut screensavers = Vec::new();
-    if let Some(s) = app::random_cycle_entry() {
-        screensavers.push(s);
-    }
-    screensavers.extend(preview::discover());
+    let screensavers = preview::discover();
 
     let global = GlobalConfig::load();
     let local = LocalConfig::load();

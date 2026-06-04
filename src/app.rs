@@ -181,30 +181,30 @@ impl App {
             .and_then(|f| f.to_str())
             .map(str::to_lowercase);
         let exe = std::env::current_exe().unwrap_or_default();
+        let exe_filename = exe.file_name()
+            .and_then(|f| f.to_str())
+            .map(str::to_lowercase);
+        let is_cycle_active = active_filename.is_some() && active_filename == exe_filename;
 
         self.list_items = self
             .screensavers
             .iter()
             .map(|s| {
-                let is_applied = s
-                    .path
-                    .file_name()
+                let s_filename = s.path.file_name()
                     .and_then(|f| f.to_str())
-                    .map(str::to_lowercase)
-                    .as_ref()
-                    == active_filename.as_ref();
+                    .map(str::to_lowercase);
+                let is_checked = self.local.selected_paths.contains(&s.path.to_string_lossy().into_owned());
+                let is_applied = if is_cycle_active {
+                    is_checked
+                } else {
+                    s_filename.is_some() && s_filename == active_filename
+                };
                 let exists = s.path.exists();
 
-                let is_self = s.path == exe;
-                let prefix = if is_self {
-                    "    ".to_string()
+                let prefix = if is_checked {
+                    "[x] ".to_string()
                 } else {
-                    let is_checked = self.local.selected_paths.contains(&s.path.to_string_lossy().into_owned());
-                    if is_checked {
-                        "[x] ".to_string()
-                    } else {
-                        "[ ] ".to_string()
-                    }
+                    "[ ] ".to_string()
                 };
 
                 let mut spans = vec![
@@ -248,13 +248,9 @@ impl App {
     /// Apply the currently-highlighted screensaver as the system screensaver.
     pub fn apply_highlighted(&mut self) {
         let exe = std::env::current_exe().unwrap_or_default();
-        let current_is_cycle = self.current_screensaver()
-            .map(|s| s.path == exe)
-            .unwrap_or(false);
 
-        // If selected_paths is empty and they didn't highlight the Random Cycle itself,
-        // automatically check the highlighted screensaver.
-        if self.local.selected_paths.is_empty() && !current_is_cycle {
+        // If selected_paths is empty, automatically check the highlighted screensaver.
+        if self.local.selected_paths.is_empty() {
             if let Some(s) = self.current_screensaver() {
                 self.local.selected_paths.push(s.path.to_string_lossy().into_owned());
             }
@@ -262,19 +258,12 @@ impl App {
 
         // Decide what to write to the registry based on selected_paths
         let count = self.local.selected_paths.len();
-        if count > 1 || (count == 0 && current_is_cycle) {
+        if count > 1 {
             self.global.active_scr = exe.to_string_lossy().into_owned();
-            if count > 1 {
-                self.status = Some(StatusMessage {
-                    text: format!("Applied cycle of {} screensavers", count),
-                    kind: StatusKind::Info,
-                });
-            } else {
-                self.status = Some(StatusMessage {
-                    text: "Applied Random Cycle (all screensavers)".to_string(),
-                    kind: StatusKind::Info,
-                });
-            }
+            self.status = Some(StatusMessage {
+                text: format!("Applied cycle of {} screensavers", count),
+                kind: StatusKind::Info,
+            });
         } else if count == 1 {
             let path = self.local.selected_paths[0].clone();
             self.global.active_scr = path.clone();
@@ -419,12 +408,7 @@ impl App {
 
     /// Re-discover screensavers and refresh the list.
     pub fn refresh_screensavers(&mut self) {
-        let mut list = Vec::new();
-        if let Some(s) = random_cycle_entry() {
-            list.push(s);
-        }
-        list.extend(crate::preview::discover());
-        self.screensavers = list;
+        self.screensavers = crate::preview::discover();
         self.resolve_highlight();
         self.status = Some(StatusMessage {
             text: "Refreshed screensavers list.".to_string(),
@@ -451,14 +435,6 @@ impl App {
         let Some(s) = self.current_screensaver() else {
             return;
         };
-        let exe = std::env::current_exe().unwrap_or_default();
-        if s.path == exe {
-            self.status = Some(StatusMessage {
-                text: "Random Cycle has no native configuration dialog.".to_string(),
-                kind: StatusKind::Info,
-            });
-            return;
-        }
         if let Err(e) = std::process::Command::new(&s.path).arg("/c").spawn() {
             self.status = Some(StatusMessage {
                 text: format!("Configure failed: {e}"),
@@ -478,14 +454,6 @@ impl App {
             let Some(s) = self.current_screensaver() else {
                 return;
             };
-            let exe = std::env::current_exe().unwrap_or_default();
-            if s.path == exe {
-                self.status = Some(StatusMessage {
-                    text: "Cannot select 'Random Cycle' for cycling.".to_string(),
-                    kind: StatusKind::Error,
-                });
-                return;
-            }
             (s.path.to_string_lossy().into_owned(), s.name.clone())
         };
 
@@ -663,13 +631,7 @@ impl App {
 
 pub use ratatui::crossterm::event::{KeyCode, KeyModifiers};
 
-/// Build a "Random Cycle" screensaver entry pointing at the current
-/// executable.
-pub fn random_cycle_entry() -> Option<Screensaver> {
-    let path = std::env::current_exe().ok()?;
-    let name = "Random Cycle".to_string();
-    Some(Screensaver { name, path })
-}
+
 
 /// Convenience: kick off the random cycle and return when it finishes.
 pub fn run_random_cycle() {
