@@ -454,8 +454,26 @@ fn run_doctor() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => println!("FAILED (Error: {})", e),
     }
 
-    // 5. Theme Detection Check
-    print!("Theme Detection:         ");
+    // 5. Local Preferences Check
+    println!("\nLocal Preferences Check:");
+    let local = LocalConfig::load();
+    println!("  - Prevent System Sleep:      {}", if local.prevent_sleep { "ENABLED (Active Awake)" } else { "DISABLED (Normal)" });
+    println!("  - Random Cycle Duration:     {} seconds", local.random_cycle_secs);
+    println!("  - Selected Cycle Screensavers ({}):", local.selected_paths.len());
+    if local.selected_paths.is_empty() {
+        println!("      (None selected; default cycle will cycle all discovered screensavers)");
+    } else {
+        for path in &local.selected_paths {
+            let p = std::path::Path::new(path);
+            let exists = p.exists();
+            let status = if exists { "OK" } else { "MISSING FILE" };
+            let filename = p.file_name().and_then(|f| f.to_str()).unwrap_or(path);
+            println!("      - {} [{}] ({})", filename, status, path);
+        }
+    }
+
+    // 6. Theme Detection Check
+    print!("\nTheme Detection:         ");
     let theme = TuiTheme::detect(None);
     println!(
         "OK (High Contrast: {}, No Color: {})",
