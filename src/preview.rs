@@ -84,6 +84,23 @@ fn prettify(path: &Path) -> String {
     }
 }
 
+/// Returns true if the screensaver is a Windows stock screensaver.
+pub fn is_stock_screensaver(path: &Path) -> bool {
+    let filename = path.file_name()
+        .and_then(|f| f.to_str())
+        .map(str::to_lowercase)
+        .unwrap_or_default();
+    matches!(
+        filename.as_str(),
+        "bubbles.scr"
+            | "mystify.scr"
+            | "ribbons.scr"
+            | "sstext3d.scr"
+            | "scrnsave.scr"
+            | "photoscreensaver.scr"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

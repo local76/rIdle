@@ -21,11 +21,11 @@ use crate::app::{App, FocusedSection, GlobalField};
 
 
 
-/// Number of rows reserved for the help block (2 borders + 9 content lines).
-const HELP_ROWS: u16 = 11;
-/// Number of rows reserved for the global-prefs block (2 borders + 4 content
+/// Number of rows reserved for the help block (2 borders + 10 content lines).
+const HELP_ROWS: u16 = 12;
+/// Number of rows reserved for the global-prefs block (2 borders + 5 content
 /// lines + 1 padding).
-const PREFS_ROWS: u16 = 7;
+const PREFS_ROWS: u16 = 8;
 /// Number of rows for the title bar (2 lines + 1 bottom border).
 const TITLE_ROWS: u16 = 3;
 
@@ -139,6 +139,7 @@ fn render_prefs(app: &mut App, frame: &mut Frame, area: Rect) {
             Constraint::Length(1), // timeout
             Constraint::Length(1), // prevent sleep
             Constraint::Length(1), // cycle time
+            Constraint::Length(1), // hide stock
         ])
         .split(inner);
 
@@ -158,6 +159,16 @@ fn render_prefs(app: &mut App, frame: &mut Frame, area: Rect) {
         "DISABLED (NORMAL)"
     };
     let sleep_color = if app.local.prevent_sleep {
+        theme.accent_secondary
+    } else {
+        theme.text_dim
+    };
+    let hide_stock_status = if app.local.hide_stock {
+        "YES"
+    } else {
+        "NO"
+    };
+    let hide_stock_color = if app.local.hide_stock {
         theme.accent_secondary
     } else {
         theme.text_dim
@@ -214,6 +225,13 @@ fn render_prefs(app: &mut App, frame: &mut Frame, area: Rect) {
         "Cycle time:     ",
         cycle_time_value,
         theme.accent_primary,
+    );
+    field_row(
+        rows[4],
+        GlobalField::HideStock,
+        "Hide stock:     ",
+        hide_stock_status.to_string(),
+        hide_stock_color,
     );
 }
 
@@ -335,13 +353,22 @@ fn render_list(app: &mut App, frame: &mut Frame, area: Rect) {
 
 fn render_help(theme: crate::theme::TuiTheme, frame: &mut Frame, area: Rect) {
     let block = Block::default()
-        .title(Span::styled(" Help ", Style::default().fg(theme.header)))
+        .title(Span::styled(" Help & CLI Reference ", Style::default().fg(theme.header)))
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.border));
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    let lines = vec![
+    let cols = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(55),
+            Constraint::Percentage(45),
+        ])
+        .split(inner);
+
+    let shortcuts = vec![
+        Line::from(Span::styled("KEYBOARD SHORTCUTS:", Style::default().fg(theme.header))),
         Line::from(vec![
             Span::styled("[Tab]     ", Style::default().fg(theme.accent_primary)),
             Span::raw("cycle focus"),
@@ -352,15 +379,15 @@ fn render_help(theme: crate::theme::TuiTheme, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled("[←/→]     ", Style::default().fg(theme.accent_primary)),
-            Span::raw("adjust timeout / cycle duration"),
+            Span::raw("adjust timeout/cycle"),
         ]),
         Line::from(vec![
             Span::styled("[Space]   ", Style::default().fg(theme.accent_primary)),
-            Span::raw("toggle select / preference"),
+            Span::raw("toggle select/pref"),
         ]),
         Line::from(vec![
             Span::styled("[Enter]   ", Style::default().fg(theme.accent_primary)),
-            Span::raw("apply selection / highlight"),
+            Span::raw("apply highlighted"),
         ]),
         Line::from(vec![
             Span::styled("[F5 / R]  ", Style::default().fg(theme.accent_primary)),
@@ -379,7 +406,33 @@ fn render_help(theme: crate::theme::TuiTheme, frame: &mut Frame, area: Rect) {
             Span::raw("quit"),
         ]),
     ];
-    frame.render_widget(Paragraph::new(lines).wrap(Wrap { trim: false }), inner);
+
+    let cli_commands = vec![
+        Line::from(Span::styled("CLI COMMANDS:", Style::default().fg(theme.header))),
+        Line::from(vec![
+            Span::styled("run / start   ", Style::default().fg(theme.accent_primary)),
+            Span::raw("launch active fullscreen"),
+        ]),
+        Line::from(vec![
+            Span::styled("stop          ", Style::default().fg(theme.accent_primary)),
+            Span::raw("kill all screensavers"),
+        ]),
+        Line::from(vec![
+            Span::styled("toggle-active ", Style::default().fg(theme.accent_primary)),
+            Span::raw("toggle system active"),
+        ]),
+        Line::from(vec![
+            Span::styled("lock          ", Style::default().fg(theme.accent_primary)),
+            Span::raw("lock PC & start"),
+        ]),
+        Line::from(vec![
+            Span::styled("doctor        ", Style::default().fg(theme.accent_primary)),
+            Span::raw("run diagnostics report"),
+        ]),
+    ];
+
+    frame.render_widget(Paragraph::new(shortcuts).wrap(Wrap { trim: false }), cols[0]);
+    frame.render_widget(Paragraph::new(cli_commands).wrap(Wrap { trim: false }), cols[1]);
 }
 
 pub fn truncate(s: &str, max: usize) -> String {

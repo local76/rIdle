@@ -38,14 +38,16 @@ pub enum GlobalField {
     Timeout,
     PreventSleep,
     CycleTime,
+    HideStock,
 }
 
 impl GlobalField {
-    pub const ALL: [GlobalField; 4] = [
+    pub const ALL: [GlobalField; 5] = [
         GlobalField::Active,
         GlobalField::Timeout,
         GlobalField::PreventSleep,
         GlobalField::CycleTime,
+        GlobalField::HideStock,
     ];
 }
 
@@ -130,19 +132,29 @@ impl App {
     /// Indices into `self.screensavers` that match the current filter.
     /// Empty filter → all indices, in order.
     pub fn filtered_indices(&self) -> Vec<usize> {
-        if self.filter.is_empty() {
-            return (0..self.screensavers.len()).collect();
+        let indices: Vec<usize> = if self.filter.is_empty() {
+            (0..self.screensavers.len()).collect()
+        } else {
+            let needle = self.filter.to_lowercase();
+            self.screensavers
+                .iter()
+                .enumerate()
+                .filter_map(|(i, s)| {
+                    let in_name = s.name.to_lowercase().contains(&needle);
+                    let in_path = s.path.to_string_lossy().to_lowercase().contains(&needle);
+                    if in_name || in_path { Some(i) } else { None }
+                })
+                .collect()
+        };
+
+        if self.local.hide_stock {
+            indices
+                .into_iter()
+                .filter(|&i| !crate::preview::is_stock_screensaver(&self.screensavers[i].path))
+                .collect()
+        } else {
+            indices
         }
-        let needle = self.filter.to_lowercase();
-        self.screensavers
-            .iter()
-            .enumerate()
-            .filter_map(|(i, s)| {
-                let in_name = s.name.to_lowercase().contains(&needle);
-                let in_path = s.path.to_string_lossy().to_lowercase().contains(&needle);
-                if in_name || in_path { Some(i) } else { None }
-            })
-            .collect()
     }
 
     /// Map a position in the filtered list to the real index, clamping.
@@ -337,6 +349,32 @@ impl App {
                     text: format!("Prevent sleep = {}", self.local.prevent_sleep),
                     kind: StatusKind::Info,
                 })
+            }
+            Err(e) => {
+                self.status = Some(StatusMessage {
+                    text: format!("Save failed: {e}"),
+                    kind: StatusKind::Error,
+                })
+            }
+        }
+    }
+
+    /// Toggle hiding stock windows screensavers.
+    pub fn toggle_hide_stock(&mut self) {
+        self.local.hide_stock = !self.local.hide_stock;
+        if let Some(s) = self.current_screensaver() {
+            if let Some(name) = s.path.file_name().and_then(|f| f.to_str()) {
+                self.local.last_selected = Some(name.to_string());
+            }
+        }
+        match self.local.save() {
+            Ok(()) => {
+                self.resolve_highlight();
+                self.status = Some(StatusMessage {
+                    text: format!("Hide stock screensavers = {}", self.local.hide_stock),
+                    kind: StatusKind::Info,
+                });
+                self.update_list_items();
             }
             Err(e) => {
                 self.status = Some(StatusMessage {
@@ -615,6 +653,7 @@ impl App {
             FocusedSection::GlobalPrefs => match self.global_field {
                 GlobalField::Active => self.toggle_active(),
                 GlobalField::PreventSleep => self.toggle_prevent_sleep(),
+                GlobalField::HideStock => self.toggle_hide_stock(),
                 GlobalField::Timeout | GlobalField::CycleTime => {}
             },
             FocusedSection::SaverList => self.apply_highlighted(),
@@ -938,6 +977,11 @@ mod tests {
         // Filter no match
         app.filter = "none".to_string();
         assert_eq!(app.filtered_indices(), Vec::<usize>::new());
+
+        // Hide stock screensavers
+        app.filter = String::new();
+        app.local.hide_stock = true;
+        assert_eq!(app.filtered_indices(), Vec::<usize>::new());
     }
 
     #[test]
@@ -956,6 +1000,10 @@ mod tests {
         // Move down to CycleTime
         app.handle_key(KeyCode::Down, KeyModifiers::empty());
         assert_eq!(app.global_field, GlobalField::CycleTime);
+
+        // Move down to HideStock
+        app.handle_key(KeyCode::Down, KeyModifiers::empty());
+        assert_eq!(app.global_field, GlobalField::HideStock);
 
         // Tab cycles focus to SaverList
         app.handle_key(KeyCode::Tab, KeyModifiers::empty());

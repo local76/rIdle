@@ -83,6 +83,7 @@ pub struct LocalConfig {
     /// Hidden/advanced setting for power users to customize the random cycle interval (in seconds).
     pub random_cycle_secs: u32,
     pub selected_paths: Vec<String>,
+    pub hide_stock: bool,
 }
 
 impl Default for LocalConfig {
@@ -92,6 +93,7 @@ impl Default for LocalConfig {
             prevent_sleep: false,
             random_cycle_secs: 30,
             selected_paths: Vec::new(),
+            hide_stock: false,
         }
     }
 }
@@ -125,6 +127,8 @@ impl LocalConfig {
                     .map(|s| s.trim().to_string())
                     .filter(|s| !s.is_empty())
                     .collect();
+            } else if let Some(v) = line.strip_prefix("hide_stock: ") {
+                out.hide_stock = v.trim() == "true";
             }
         }
         out
@@ -138,11 +142,12 @@ impl LocalConfig {
             std::fs::create_dir_all(parent)?;
         }
         let content = format!(
-            "last_selected: {}\nprevent_sleep: {}\nrandom_cycle_secs: {}\nselected_paths: {}\n",
+            "last_selected: {}\nprevent_sleep: {}\nrandom_cycle_secs: {}\nselected_paths: {}\nhide_stock: {}\n",
             self.last_selected.as_deref().unwrap_or(""),
             self.prevent_sleep,
             self.random_cycle_secs,
             self.selected_paths.join(";"),
+            self.hide_stock,
         );
         std::fs::write(path, content)
     }
@@ -181,6 +186,7 @@ mod tests {
                 "C:\\Windows\\System32\\mystify.scr".to_string(),
                 "C:\\Windows\\System32\\bubbles.scr".to_string(),
             ],
+            hide_stock: true,
         };
 
         // Save
@@ -198,6 +204,7 @@ mod tests {
                 "C:\\Windows\\System32\\bubbles.scr".to_string(),
             ]
         );
+        assert!(loaded.hide_stock);
 
         // Clean up temp dir
         let _ = std::fs::remove_dir_all(&temp_dir);
