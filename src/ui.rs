@@ -21,8 +21,8 @@ use crate::app::{App, FocusedSection, GlobalField};
 
 
 
-/// Number of rows reserved for the help block (2 borders + 2 content lines).
-const HELP_ROWS: u16 = 4;
+/// Number of rows reserved for the help block (2 borders + 12 content lines).
+const HELP_ROWS: u16 = 14;
 /// Number of rows reserved for the global-prefs block (2 borders + 5 content
 /// lines + 1 padding).
 const PREFS_ROWS: u16 = 9;
@@ -503,31 +503,50 @@ fn render_help(theme: crate::theme::TuiTheme, frame: &mut Frame, area: Rect) {
     frame.render_widget(block, area);
 
     let help_lines = vec![
+        Line::from(Span::styled("KEYBOARD SHORTCUTS:", Style::default().fg(theme.header))),
         Line::from(vec![
-            Span::styled("Tab", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Focus │ "),
-            Span::styled("↑/↓", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Move │ "),
-            Span::styled("←/→", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Adjust │ "),
-            Span::styled("Space", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Toggle/Deselect │ "),
-            Span::styled("Enter", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Apply"),
+            Span::styled("[Tab]     ", Style::default().fg(theme.accent_primary)),
+            Span::raw("cycle focus between Preferences and Screen Saver list"),
         ]),
         Line::from(vec![
-            Span::styled("P", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Preview │ "),
-            Span::styled("C", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Config │ "),
-            Span::styled("D", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Delete │ "),
-            Span::styled("V", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Vanity │ "),
-            Span::styled("R/F5", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Rescan │ "),
-            Span::styled("Esc/Q", Style::default().fg(theme.accent_primary)),
-            Span::raw(": Quit"),
+            Span::styled("[↑/↓]     ", Style::default().fg(theme.accent_primary)),
+            Span::raw("navigate preferences or screensaver entries"),
+        ]),
+        Line::from(vec![
+            Span::styled("[←/→]     ", Style::default().fg(theme.accent_primary)),
+            Span::raw("adjust screensaver Timeout or Cycle Time"),
+        ]),
+        Line::from(vec![
+            Span::styled("[Space]   ", Style::default().fg(theme.accent_primary)),
+            Span::raw("toggle checkboxes or active system settings"),
+        ]),
+        Line::from(vec![
+            Span::styled("[Enter]   ", Style::default().fg(theme.accent_primary)),
+            Span::raw("apply highlighted screensaver configuration to registry"),
+        ]),
+        Line::from(vec![
+            Span::styled("[F5 / R]  ", Style::default().fg(theme.accent_primary)),
+            Span::raw("re-scan System32 and %APPDATA% directories for screensavers"),
+        ]),
+        Line::from(vec![
+            Span::styled("[P]       ", Style::default().fg(theme.accent_primary)),
+            Span::raw("launch a fullscreen preview of highlighted screensaver"),
+        ]),
+        Line::from(vec![
+            Span::styled("[C]       ", Style::default().fg(theme.accent_primary)),
+            Span::raw("open the native configuration settings window"),
+        ]),
+        Line::from(vec![
+            Span::styled("[D]       ", Style::default().fg(theme.accent_primary)),
+            Span::raw("delete downloaded screensavers from local system"),
+        ]),
+        Line::from(vec![
+            Span::styled("[V]       ", Style::default().fg(theme.accent_primary)),
+            Span::raw("toggle interactive vanity modes and animations"),
+        ]),
+        Line::from(vec![
+            Span::styled("[q / Esc] ", Style::default().fg(theme.accent_primary)),
+            Span::raw("quit the manager interface"),
         ]),
     ];
 

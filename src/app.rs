@@ -703,18 +703,20 @@ impl App {
     #[cfg(feature = "downloader")]
     pub fn trigger_online_download(&mut self, action: PendingAction) -> bool {
         if let Some(s) = self.current_screensaver() {
-            if let Some(ref url) = s.download_url {
-                let entry = crate::downloader::RegistryEntry {
-                    name: s.name.clone(),
-                    author: String::new(),
-                    description: String::new(),
-                    download_url: url.clone(),
-                    version: String::new(),
-                };
-                self.pending_action = Some(action);
-                self.download_state = Some(crate::downloader::spawn_download(&entry));
-                self.visual_progress = 0.0;
-                return true;
+            if s.download_url.is_some() && !s.path.exists() {
+                if let Some(ref url) = s.download_url {
+                    let entry = crate::downloader::RegistryEntry {
+                        name: s.name.clone(),
+                        author: String::new(),
+                        description: String::new(),
+                        download_url: url.clone(),
+                        version: String::new(),
+                    };
+                    self.pending_action = Some(action);
+                    self.download_state = Some(crate::downloader::spawn_download(&entry));
+                    self.visual_progress = 0.0;
+                    return true;
+                }
             }
         }
         false
