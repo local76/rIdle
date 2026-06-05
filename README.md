@@ -5,7 +5,7 @@ A lightweight, modern Windows Screen Saver Management TUI dashboard built in Rus
 ```
 +================================================================+
 | WINDOWS SCREENSAVERS MANAGER  (WSM)                            |
-| Version 0.7.10                                                 |
+| Version 0.8.0                                                 |
 +----------------------------------------------------------------+
 |  Global System Preferences                                     |
 |  ▶ Active:         ACTIVE                                      |
