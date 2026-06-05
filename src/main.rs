@@ -250,9 +250,11 @@ fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::Error
             let mut reset_state = false;
             let mut download_success = false;
             let mut err_msg = None;
+            let mut downloaded_name = String::new();
 
             if let Some(ref state_mutex) = app.download_state {
                 if let Ok(state) = state_mutex.lock() {
+                    downloaded_name = state.name.clone();
                     match state.status {
                         crate::downloader::DownloadStatus::Success => {
                             if app.visual_progress >= 1.0 {
@@ -276,6 +278,7 @@ fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::Error
                         text: "Download completed successfully!".to_string(),
                         kind: crate::app::StatusKind::Info,
                     });
+                    app.notice = Some(format!("Downloaded screensaver: {}", downloaded_name));
                     app.refresh_screensavers();
                     if let Some(action) = app.pending_action.take() {
                         match action {
