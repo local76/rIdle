@@ -260,6 +260,8 @@ fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::Error
     // Allow Win32 window style/size changes to propagate to the console buffer
     std::thread::sleep(std::time::Duration::from_millis(50));
 
+    win32::center_console_window();
+
     let backend = CrosstermBackend::new(out);
     let mut terminal = Terminal::new(backend)?;
 

@@ -13,6 +13,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use tracing::{info, error};
 
 /// An entry in the curated screensaver online registry.
 /// Supports cross-platform downloads via the `downloads` map (preferred).
@@ -257,33 +258,74 @@ pub fn spawn_download(entry: &RegistryEntry) -> Arc<Mutex<DownloadState>> {
                 std::fs::create_dir_all(parent)?;
             }
 
-            let response = ureq::get(&download_url)
-                .set("User-Agent", "rIdle/2.6.4 (+https://github.com/local76)")
-                .call()?;
-            let total_bytes = response
-                .header("Content-Length")
-                .and_then(|s| s.parse::<u64>().ok())
-                .unwrap_or(0);
-
-            let mut reader = response.into_reader();
-            let mut file = File::create(&path)?;
-            let mut buffer = [0; 8192];
+            info!("Starting download for '{}' from '{}'", name, download_url);
+            let total_bytes: u64;
             let mut downloaded: u64 = 0;
+            let mut file = File::create(&path)?;
 
-            loop {
-                let bytes_read = reader.read(&mut buffer)?;
-                if bytes_read == 0 {
-                    break;
+            if download_url.starts_with("file://") || download_url.starts_with("file:/") {
+                // Parse file path from file:// URL
+                let file_path_str = download_url.trim_start_matches("file://").trim_start_matches("file:/");
+                // On Windows, file:///C:/path/to/file or file://C:/path/to/file or file:/C:/path/to/file
+                let file_path_str = if file_path_str.starts_with('/') {
+                    &file_path_str[1..]
+                } else {
+                    file_path_str
+                };
+                let decoded_path = file_path_str.replace("%20", " ");
+                let src_path = PathBuf::from(decoded_path);
+
+                info!("Local copy initiated from '{}' to '{}'", src_path.display(), path.display());
+                let mut src_file = File::open(&src_path)?;
+                total_bytes = src_file.metadata()?.len();
+
+                let mut buffer = [0; 8192];
+                loop {
+                    let bytes_read = src_file.read(&mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    file.write_all(&buffer[..bytes_read])?;
+                    downloaded += bytes_read as u64;
+
+                    // Update state
+                    if let Ok(mut s) = thread_state.lock() {
+                        s.downloaded_bytes = downloaded;
+                        s.total_bytes = total_bytes;
+                        if total_bytes > 0 {
+                            s.progress = downloaded as f64 / total_bytes as f64;
+                        }
+                    }
+                    // Add tiny sleep to allow the TUI animation to render for local files
+                    std::thread::sleep(std::time::Duration::from_millis(5));
                 }
-                file.write_all(&buffer[..bytes_read])?;
-                downloaded += bytes_read as u64;
+            } else {
+                let response = ureq::get(&download_url)
+                    .set("User-Agent", "rIdle/2.6.4 (+https://github.com/local76)")
+                    .call()?;
+                total_bytes = response
+                    .header("Content-Length")
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
 
-                // Update state
-                if let Ok(mut s) = thread_state.lock() {
-                    s.downloaded_bytes = downloaded;
-                    s.total_bytes = total_bytes;
-                    if total_bytes > 0 {
-                        s.progress = downloaded as f64 / total_bytes as f64;
+                let mut reader = response.into_reader();
+                let mut buffer = [0; 8192];
+
+                loop {
+                    let bytes_read = reader.read(&mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    file.write_all(&buffer[..bytes_read])?;
+                    downloaded += bytes_read as u64;
+
+                    // Update state
+                    if let Ok(mut s) = thread_state.lock() {
+                        s.downloaded_bytes = downloaded;
+                        s.total_bytes = total_bytes;
+                        if total_bytes > 0 {
+                            s.progress = downloaded as f64 / total_bytes as f64;
+                        }
                     }
                 }
             }
@@ -377,9 +419,12 @@ pub fn spawn_download(entry: &RegistryEntry) -> Arc<Mutex<DownloadState>> {
         })();
 
         if let Err(e) = res {
+            error!("Download failed for '{}': {}", name, e);
             if let Ok(mut s) = thread_state.lock() {
                 s.status = DownloadStatus::Error(e.to_string());
             }
+        } else {
+            info!("Download succeeded for '{}'", name);
         }
     });
 
