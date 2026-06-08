@@ -8,7 +8,7 @@ use windows_sys::Win32::System::Console::{
     GetConsoleScreenBufferInfoEx, GetConsoleWindow, GetConsoleTitleW, SetConsoleTitleW
 };
 use windows_sys::Win32::System::Power::{
-    SetThreadExecutionState, GetSystemPowerStatus, SYSTEM_POWER_STATUS,
+    SetThreadExecutionState,
     ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, ES_AWAYMODE_REQUIRED
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -156,31 +156,26 @@ fn query_high_contrast() -> bool {
 }
 
 fn query_accent_color() -> Rgb {
-    #[link(name = "dwmapi")]
-    unsafe extern "system" {
-        fn DwmGetColorizationColor(pcr_color: *mut u32, pf_opaque_blend: *mut i32) -> i32;
+    // Delegate to rcommon (which uses DWM internally when "widgets" + "sys-info" features are enabled).
+    // Convert ratatui Color::Rgb back to our local Rgb for the palette.
+    match rcommon::sys_info::get_dwm_accent_color() {
+        ratatui::style::Color::Rgb(r, g, b) => Rgb(r, g, b),
+        _ => Rgb(0, 120, 215),
     }
-    let mut color: u32 = 0;
-    let mut _opaque: i32 = 0;
-    let hr = unsafe { DwmGetColorizationColor(&mut color, &mut _opaque) };
-    if hr != 0 {
-        return Rgb(0, 120, 215);
-    }
-    Rgb::from_argb(color)
 }
 
 pub fn query_power_status() -> PowerStatus {
-    let mut s: SYSTEM_POWER_STATUS = unsafe { std::mem::zeroed() };
-    let ok = unsafe { GetSystemPowerStatus(&mut s) };
-    if ok == 0 {
-        return PowerStatus {
+    // Delegate to rcommon for the common power query logic (reduces duplication of GetSystemPowerStatus).
+    if let Some(p) = rcommon::sys_info::query_power_status() {
+        PowerStatus {
+            ac_online: p.ac_online,
+            battery_percent: p.battery_percent,
+        }
+    } else {
+        PowerStatus {
             ac_online: true,
             battery_percent: 255,
-        };
-    }
-    PowerStatus {
-        ac_online: s.ACLineStatus == 1,
-        battery_percent: s.BatteryLifePercent,
+        }
     }
 }
 

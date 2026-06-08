@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+- **Renamed project** from `rIdle` to `rIdle-tui`. The GitHub repository, Cargo package name, binary name, and all user-facing labels now use the `-tui` suffix to make the program's role as a terminal user interface explicit (matching `rTemplate-tui`).
+  - Repository: `local76/rIdle` → `local76/rIdle-tui`
+  - Crate/binary: `ridle` → `ridle-tui`
+  - Config file: `%APPDATA%\rIdle\config.yaml` → `%APPDATA%\rIdle-tui\config.yaml`
+  - Downloader cache: `%APPDATA%\rIdle\screensavers\` → `%APPDATA%\rIdle-tui\screensavers\`
+  - Linux package names: `ridle` → `ridle-tui`
+
 ## [2.6.4] - 2026-06-06
 ### Changed
 - Reorganized repository file layout to align with ARCHITECTURE.md.

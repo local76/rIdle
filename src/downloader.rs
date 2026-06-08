@@ -240,7 +240,7 @@ pub fn spawn_download(entry: &RegistryEntry) -> Arc<Mutex<DownloadState>> {
                 .ok()
                 .map(PathBuf::from)
                 .or_else(|| std::env::var("HOME").ok().map(|h| PathBuf::from(h).join(".local/share")))
-                .map(|p| p.join("rIdle"))
+                .map(|p| p.join("rIdle-tui"))
         };
 
         base.and_then(|parent| {

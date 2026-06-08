@@ -1,5 +1,5 @@
 [package]
-name = "ridle"
+name = "ridle-tui"
 version = "2.6.5"
 edition = "2024"
 rust-version = "1.85"
@@ -18,7 +18,7 @@ clap = { version = "4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main" }
+rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"
@@ -47,17 +47,17 @@ winres = "0.1"
 [package.metadata.deb]
 maintainer = "Jeryd <jerydleuck@gmail.com>"
 assets = [
-    ["target/x86_64-unknown-linux-musl/release/ridle", "usr/bin/ridle", "755"],
-    ["assets/brand/app_icon.png", "usr/share/pixmaps/ridle.png", "644"],
-    ["packaging/desktop/ridle.desktop", "usr/share/applications/ridle.desktop", "644"],
+    ["target/x86_64-unknown-linux-musl/release/ridle-tui", "usr/bin/ridle-tui", "755"],
+    ["assets/brand/app_icon.png", "usr/share/pixmaps/ridle-tui.png", "644"],
+    ["packaging/desktop/ridle-tui.desktop", "usr/share/applications/ridle-tui.desktop", "644"],
 ]
 
 [package.metadata.generate-rpm]
 auto-req = "no"
 assets = [
-    { source = "target/x86_64-unknown-linux-musl/release/ridle", dest = "/usr/bin/ridle", mode = "755" },
-    { source = "assets/brand/app_icon.png", dest = "/usr/share/pixmaps/ridle.png", mode = "644" },
-    { source = "packaging/desktop/ridle.desktop", dest = "/usr/share/applications/ridle.desktop", mode = "644" }
+    { source = "target/x86_64-unknown-linux-musl/release/ridle-tui", dest = "/usr/bin/ridle-tui", mode = "755" },
+    { source = "assets/brand/app_icon.png", dest = "/usr/share/pixmaps/ridle-tui.png", mode = "644" },
+    { source = "packaging/desktop/ridle-tui.desktop", dest = "/usr/share/applications/ridle-tui.desktop", mode = "644" }
 ]
 
 [patch."https://github.com/local76/rCommon.git"]
