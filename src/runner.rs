@@ -49,8 +49,8 @@ pub fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::E
         return Err("Interactive TUI requires a TTY stdin.".into());
     }
 
-    if rcommon::window::should_relaunch_in_conhost() {
-        let _ = rcommon::window::relaunch_in_conhost();
+    if library::window::should_relaunch_in_conhost() {
+        let _ = library::window::relaunch_in_conhost();
         std::process::exit(0);
     }
 

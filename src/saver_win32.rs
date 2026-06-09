@@ -132,7 +132,7 @@ impl SystemMetrics {
             screen_h,
             dpi,
             window_dpi,
-            dark_mode: rcommon::sys_info::query_dark_mode(),
+            dark_mode: library::sys_info::query_dark_mode(),
             high_contrast: query_high_contrast(),
             accent: query_accent_color(),
             power: query_power_status(),
@@ -158,7 +158,7 @@ fn query_high_contrast() -> bool {
 fn query_accent_color() -> Rgb {
     // Delegate to rcommon (which uses DWM internally when "widgets" + "sys-info" features are enabled).
     // Convert ratatui Color::Rgb back to our local Rgb for the palette.
-    match rcommon::sys_info::get_dwm_accent_color() {
+    match library::sys_info::get_dwm_accent_color() {
         ratatui::style::Color::Rgb(r, g, b) => Rgb(r, g, b),
         _ => Rgb(0, 120, 215),
     }
@@ -166,7 +166,7 @@ fn query_accent_color() -> Rgb {
 
 pub fn query_power_status() -> PowerStatus {
     // Delegate to rcommon for the common power query logic (reduces duplication of GetSystemPowerStatus).
-    if let Some(p) = rcommon::sys_info::query_power_status() {
+    if let Some(p) = library::sys_info::query_power_status() {
         PowerStatus {
             ac_online: p.ac_online,
             battery_percent: p.battery_percent,

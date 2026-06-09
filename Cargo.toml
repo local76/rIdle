@@ -1,5 +1,5 @@
-﻿[package]
-name = "ridle-tui"
+[package]
+name = "trance"
 version = "2.6.8"
 edition = "2024"
 rust-version = "1.85"
@@ -18,7 +18,7 @@ clap = { version = "4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
+library = { git = "https://github.com/local76/library.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"
@@ -60,5 +60,5 @@ assets = [
     { source = "packaging/desktop/ridle-tui.desktop", dest = "/usr/share/applications/ridle-tui.desktop", mode = "644" }
 ]
 
-[patch."https://github.com/local76/rCommon.git"]
-rcommon = { path = "../rCommon" }
+[patch."https://github.com/local76/library.git"]
+library = { path = "../library" }

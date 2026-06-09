@@ -39,9 +39,9 @@ impl Default for GlobalConfig {
 
 impl GlobalConfig {
     pub fn load() -> Self {
-        let active_scr = rcommon::reg::read_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_SCR).unwrap_or_default();
-        let active = rcommon::reg::read_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_ACTIVE).as_deref() == Some("1");
-        let timeout = rcommon::reg::read_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_TIMEOUT)
+        let active_scr = library::reg::read_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_SCR).unwrap_or_default();
+        let active = library::reg::read_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_ACTIVE).as_deref() == Some("1");
+        let timeout = library::reg::read_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_TIMEOUT)
             .and_then(|s| s.parse::<u32>().ok())
             .unwrap_or(DEFAULT_TIMEOUT_SECS);
         GlobalConfig {
@@ -53,9 +53,9 @@ impl GlobalConfig {
 
     pub fn save(&self) -> std::io::Result<()> {
         let res = (|| {
-            rcommon::reg::write_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_SCR, &self.active_scr)?;
-            rcommon::reg::write_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_ACTIVE, if self.active { "1" } else { "0" })?;
-            rcommon::reg::write_string(rcommon::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_TIMEOUT, &self.timeout.to_string())?;
+            library::reg::write_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_SCR, &self.active_scr)?;
+            library::reg::write_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_ACTIVE, if self.active { "1" } else { "0" })?;
+            library::reg::write_string(library::reg::HKEY_CURRENT_USER, REG_DESKTOP, REG_TIMEOUT, &self.timeout.to_string())?;
 
             // Propagate settings changes to the OS immediately
             if !cfg!(test) {
