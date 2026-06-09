@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.9] - 2026-06-09
+
+### Renamed
+- **Project rename**: `trance` was previously `trance-tui` / `rIdle`. The Cargo package name, binary name, file paths, registry keys, AppData paths, and docs are now lowercase `trance`. Behavior and features are unchanged.
+
+### Changed
+- README rewritten in the new register: screensaver picker feature list, install matrix, CLI flags, configuration, build instructions, license.
+- Drop the legacy "r*" and "Local freedom" branding throughout.
+- Drop the per-repo `rApps` umbrella and `build_all.ps1` from this repo; build orchestration lives in [`toolkit`](https://github.com/local76/toolkit).
+- The `registry.json` entries now reference lowercase scene names (`glyphs`, `flame`, `cosmos`, etc.) and the new GitHub release URLs for [`screensavers`](https://github.com/local76/screensavers).
+
 ## [2.6.6] - 2026-06-08
 
 ### Refactored
