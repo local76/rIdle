@@ -18,7 +18,7 @@ clap = { version = "4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log"] }
+rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"
