@@ -14,7 +14,7 @@ pub mod actions;
 pub mod cycle;
 pub mod keys;
 
-pub use ratatui::crossterm::event::{KeyCode, KeyModifiers};
+pub use crossterm::event::{KeyCode, KeyModifiers};
 pub use cycle::run_random_cycle;
 
 const README_CONTENT: &str = include_str!("../../README.md");
@@ -427,7 +427,7 @@ mod tests {
     use std::path::PathBuf;
     use crate::config::GlobalConfig;
     use crate::theme::TuiTheme;
-    use ratatui::crossterm::event::KeyCode;
+    use crossterm::event::KeyCode;
 
     fn mock_app() -> App {
         let screensavers = vec![
@@ -592,11 +592,11 @@ mod tests {
     #[test]
     fn test_console_modes() {
         println!("TESTING RAW MODES:");
-        match ratatui::crossterm::terminal::enable_raw_mode() {
+        match crossterm::terminal::enable_raw_mode() {
             Ok(_) => println!("  enable_raw_mode: OK"),
             Err(e) => println!("  enable_raw_mode: ERROR: {}", e),
         }
-        match ratatui::crossterm::terminal::disable_raw_mode() {
+        match crossterm::terminal::disable_raw_mode() {
             Ok(_) => println!("  disable_raw_mode: OK"),
             Err(e) => println!("  disable_raw_mode: ERROR: {}", e),
         }

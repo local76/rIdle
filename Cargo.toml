@@ -11,7 +11,7 @@ default = ["downloader"]
 downloader = ["dep:ureq", "dep:serde", "dep:serde_json"]
 
 [dependencies]
-ratatui = "0.29"
+ratatui = { version = "0.30", default-features = false, features = ["termwiz"] }
 crossterm = "0.28"
 sysinfo = "0.30"
 clap = { version = "4", features = ["derive"] }

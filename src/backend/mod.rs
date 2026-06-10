@@ -7,7 +7,7 @@ use std::time::Duration;
 use tracing::info;
 
 use library::apps::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
-use ratatui::crossterm::event::{self, Event, KeyEventKind};
+use crossterm::event::{self, Event, KeyEventKind};
 
 pub mod preview;
 
@@ -39,7 +39,7 @@ use crate::win32;
 
 /// Run the screensaver manager interactive app.
 pub fn run_tui(theme_override: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
-    use ratatui::crossterm::tty::IsTty;
+    use crossterm::tty::IsTty;
     if !std::io::stdin().is_tty() {
         return Err("Interactive app requires a TTY stdin.".into());
     }

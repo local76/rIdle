@@ -4,7 +4,7 @@
 
 use crate::app::{App, FocusedSection, GlobalField, StatusMessage, StatusKind};
 use crate::config::GlobalConfig;
-use ratatui::crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::{KeyCode, KeyModifiers};
 
 impl App {
     /// Adjust the highlight in the saver list, clamping to bounds.
