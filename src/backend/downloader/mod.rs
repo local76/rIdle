@@ -242,7 +242,7 @@ pub fn spawn_download(entry: &RegistryEntry) -> Arc<Mutex<DownloadState>> {
                 .ok()
                 .map(PathBuf::from)
                 .or_else(|| std::env::var("HOME").ok().map(|h| PathBuf::from(h).join(".local/share")))
-                .map(|p| p.join("local76").join("trance"))
+                .map(|p| p.join("local76").join("app").join("trance"))
         };
 
         base.map(|parent| {

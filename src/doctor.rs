@@ -86,11 +86,12 @@ pub fn run_doctor(fix: bool) -> Result<(), Box<dyn std::error::Error>> {
     if let Ok(appdata) = std::env::var("APPDATA") {
         let rsaver_dir = PathBuf::from(appdata)
             .join("local76")
+            .join("app")
             .join("trance")
             .join("screensavers");
         let exists = rsaver_dir.exists();
         println!(
-            "  - %APPDATA%/local76/trance/screensavers: {}",
+            "  - %APPDATA%/local76/app/trance/screensavers: {}",
             if exists { "EXISTS" } else { "NOT FOUND" }
         );
         if !exists && fix {

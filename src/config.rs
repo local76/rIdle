@@ -101,7 +101,7 @@ impl LocalConfig {
     pub fn config_path() -> Option<PathBuf> {
         if cfg!(target_os = "windows") {
             let appdata = std::env::var("APPDATA").ok()?;
-            Some(PathBuf::from(appdata).join("local76").join("trance").join("config.yaml"))
+            Some(PathBuf::from(appdata).join("local76").join("app").join("trance").join("config.yaml"))
         } else {
             // Linux / macOS XDG
             let base = std::env::var("XDG_CONFIG_HOME")
@@ -109,7 +109,7 @@ impl LocalConfig {
                 .map(PathBuf::from)
                 .or_else(|| std::env::var("HOME").ok().map(|h| PathBuf::from(h).join(".config")))
                 .unwrap_or_else(|| PathBuf::from(".config"));
-            Some(base.join("local76").join("trance").join("config.yaml"))
+            Some(base.join("local76").join("app").join("trance").join("config.yaml"))
         }
     }
 
