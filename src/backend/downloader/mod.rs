@@ -24,6 +24,7 @@ pub struct RegistryEntry {
     /// Friendly name of the screensaver.
     pub name: String,
     /// Author / developer name.
+    #[allow(dead_code)]
     pub author: String,
     /// Brief description of the screensaver.
     pub description: String,
@@ -36,6 +37,7 @@ pub struct RegistryEntry {
     #[serde(default)]
     pub downloads: Option<HashMap<String, String>>,
     /// Current version string.
+    #[allow(dead_code)]
     pub version: String,
 }
 
