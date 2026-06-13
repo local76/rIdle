@@ -57,3 +57,17 @@ lto = true               # Enable Link Time Optimization
 codegen-units = 1        # Reduce codegen units to maximize size reduction
 panic = "abort"          # Remove panic unwinding code
 strip = true             # Strip symbols and debuginfo
+
+[package.metadata.generate-rpm]
+name = "app-trance"
+version = "2026.6.10-1"
+release = "1"
+arch = "x86_64"
+summary = "Windows screensaver manager"
+description = "Windows screensaver manager"
+license = "MIT"
+assets = [
+    { source = "target/release/trance", dest = "/usr/bin/trance", mode = "755" },
+    { source = "assets/brand/app_icon.png", dest = "/usr/share/pixmaps/trance.png", mode = "644" },
+    { source = "packaging/desktop/trance.desktop", dest = "/usr/share/applications/trance.desktop", mode = "644" }
+]
