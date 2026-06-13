@@ -43,6 +43,7 @@ windows = { version = "0.52.0", features = [
 embed-resource = "2"
 
 [package.metadata.deb]
+name = "app-trance"
 maintainer = "Jeryd <jerydleuck@gmail.com>"
 assets = [
     ["target/release/trance", "usr/bin/trance", "755"],
